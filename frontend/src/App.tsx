@@ -1,15 +1,24 @@
 import React, { useState, useEffect } from 'react'
+import './App.css'
+
+// Описываем тип пользователя
+interface UserInfo {
+  login: string
+  role: string
+  permissions: string[]
+}
 
 export default function App() {
-  const [login, setLogin] = useState('')
-  const [password, setPassword] = useState('')
-  const [role, setRole] = useState('user')
-  const [msg, setMsg] = useState('')
+  const [login, setLogin] = useState<string>('')
+  const [password, setPassword] = useState<string>('')
+  const [role, setRole] = useState<string>('user')
+  const [msg, setMsg] = useState<string>('')
 
-  const [users, setUsers] = useState([])
-  const [selectedUser, setSelectedUser] = useState('')
-  const [accessMsg, setAccessMsg] = useState('')
+  const [users, setUsers] = useState<UserInfo[]>([])
+  const [selectedUser, setSelectedUser] = useState<string>('')
+  const [accessMsg, setAccessMsg] = useState<string>('')
 
+  // Чтобы в адресной строке всегда было /register
   useEffect(() => {
     if (window.location.pathname !== '/register') {
       window.history.replaceState({}, '', '/register')
@@ -18,40 +27,34 @@ export default function App() {
   }, [])
 
   async function loadUsers() {
-    try {
-      const res = await fetch('http://localhost:8000/api/users')
-      const data = await res.json()
-      setUsers(data)
-      if (data.length > 0 && !selectedUser) setSelectedUser(data[0].login)
-    } catch (e) {
-      console.error(e)
+    const res = await fetch('http://localhost:8000/api/users')
+    const data: UserInfo[] = await res.json()
+    setUsers(data)
+    if (data.length > 0 && !selectedUser) {
+      setSelectedUser(data[0].login)
     }
   }
 
-  async function handleRegister(e) {
+  async function handleRegister(e: React.FormEvent) {
     e.preventDefault()
-    try {
-      const res = await fetch('http://localhost:8000/api/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ login, password, role })
-      })
-      const data = await res.json()
-      if (res.ok) {
-        setMsg('✅ Успех: ' + data.message)
-        setSelectedUser(login)
-        setLogin('')
-        setPassword('')
-        loadUsers()
-      } else {
-        setMsg('❌ Ошибка: ' + data.detail)
-      }
-    } catch (err) {
-      setMsg('⛔ Ошибка соединения с сервером')
+    const res = await fetch('http://localhost:8000/api/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ login, password, role })
+    })
+    const data = await res.json()
+    if (res.ok) {
+      setMsg('✅ Успех: ' + data.message)
+      setSelectedUser(login)
+      setLogin('')
+      setPassword('')
+      loadUsers()
+    } else {
+      setMsg('❌ Ошибка: ' + data.detail)
     }
   }
 
-  async function checkAction(perm) {
+  async function checkAction(perm: string) {
     const res = await fetch(`http://localhost:8000/api/action/${perm}?login=${selectedUser}`)
     const data = await res.json()
     if (res.ok) {
@@ -62,74 +65,97 @@ export default function App() {
   }
 
   const currentUserObj = users.find(u => u.login === selectedUser)
-  const perms = currentUserObj ? currentUserObj.permissions : []
 
   return (
-    <div>
-      <h2>Лабораторная работа 4 (Вариант 3 — Роли)</h2>
+    <div className="container">
+      {/* Фирменная шапка в стиле LOOT */}
+      <div className="hero-banner">
+        <h1 className="hero-logo">LOOT ACCESS</h1>
+        <p className="hero-subtitle">Лабораторная работа 4 • Регистрация и Ролевая модель доступа (Вариант 3)</p>
+      </div>
 
       {/* БЛОК 1: Форма регистрации */}
-      <form onSubmit={handleRegister} style={{ border: '1px solid #ccc', padding: 15, marginBottom: 20 }}>
-        <h3>1. Регистрация (/register)</h3>
-        <p>
-          Логин: <br />
-          <input value={login} onChange={e => setLogin(e.target.value)} placeholder="ivan_123" required />
-        </p>
-        <p>
-          Пароль (мин 8 симв, A-Z, a-z, 0-9, спецсимвол): <br />
-          <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Password1!" required />
-        </p>
-        <p>
-          Роль: <br />
+      <form onSubmit={handleRegister} className="card">
+        <h3>01 / Регистрация пользователя (/register)</h3>
+
+        <div className="form-group">
+          <label>ЛОГИН (3–32 символа: латиница, цифры, . _ -)</label>
+          <input
+            value={login}
+            onChange={e => setLogin(e.target.value)}
+            placeholder="Например: ivan_123"
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label>ПАРОЛЬ (мин. 8 симв., A-Z, a-z, 0-9 и спецсимвол)</label>
+          <input
+            type="password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            placeholder="Например: Password1!"
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label>ВЫБЕРИТЕ РОЛЬ</label>
           <select value={role} onChange={e => setRole(e.target.value)}>
-            <option value="user">user (обычный)</option>
+            <option value="user">user (обычный пользователь)</option>
             <option value="moderator">moderator (модератор)</option>
-            <option value="admin">admin (администратор)</option>
+            <option value="admin">admin (полный доступ)</option>
           </select>
-        </p>
-        <button type="submit">Зарегистрироваться</button>
-        {msg && <p><b>{msg}</b></p>}
+        </div>
+
+        <button type="submit" className="btn-lime">Зарегистрироваться</button>
+
+        {msg && <div className="status-box">{msg}</div>}
       </form>
 
       {/* БЛОК 2: Проверка ролей */}
-      <div style={{ border: '1px solid #ccc', padding: 15 }}>
-        <h3>2. Проверка Ролевой модели (RBAC)</h3>
-        {users.length === 0 ? <p>Сначала зарегистрируйте пользователя выше.</p> : (
+      <div className="card">
+        <h3>02 / Проверка Ролевой модели (RBAC)</h3>
+        {users.length === 0 ? (
+          <p>Сначала зарегистрируйте хотя бы одного пользователя в форме выше.</p>
+        ) : (
           <div>
-            <p>
-              Выберите пользователя: {' '}
-              <select value={selectedUser} onChange={e => { setSelectedUser(e.target.value); setAccessMsg('') }}>
+            <div className="form-group">
+              <label>ТЕКУЩИЙ ПОЛЬЗОВАТЕЛЬ</label>
+              <select
+                value={selectedUser}
+                onChange={e => { setSelectedUser(e.target.value); setAccessMsg('') }}
+              >
                 {users.map(u => (
-                  <option key={u.login} value={u.login}>{u.login} (роль: {u.role})</option>
+                  <option key={u.login} value={u.login}>
+                    {u.login} — роль: {u.role.toUpperCase()}
+                  </option>
                 ))}
               </select>
-            </p>
+            </div>
 
             {currentUserObj && (
-              <p>Текущая роль: <b>{currentUserObj.role}</b> | Права роли в БД: <b>{perms.join(', ')}</b></p>
+              <p>
+                Активные права роли в БД:{' '}
+                {currentUserObj.permissions.map(p => (
+                  <span key={p} className="badge">{p}</span>
+                ))}
+              </p>
             )}
 
-            <p>Действия в системе (зеленые — доступны роли, серые — запрещены на Backend):</p>
-            
-            <button 
-              onClick={() => checkAction('read')}
-              style={{ backgroundColor: perms.includes('read') ? '#d4edda' : '#eee', padding: '8px', marginBottom: '8px', cursor: 'pointer' }}>
-              1. Читать статьи (право: read) {perms.includes('read') ? '— [Доступно]' : '— [Заблокировано]'}
-            </button><br />
+            <div className="actions-grid">
+              <button className="btn-action" onClick={() => checkAction('read')}>
+                📖 1. Читать материалы (требуется право: read)
+              </button>
+              <button className="btn-action" onClick={() => checkAction('moderate')}>
+                🛡️ 2. Модерировать контент (требуется право: moderate)
+              </button>
+              <button className="btn-action" onClick={() => checkAction('admin')}>
+                ⚡ 3. Управление системой (требуется право: admin)
+              </button>
+            </div>
 
-            <button 
-              onClick={() => checkAction('moderate')}
-              style={{ backgroundColor: perms.includes('moderate') ? '#d4edda' : '#eee', padding: '8px', marginBottom: '8px', cursor: 'pointer' }}>
-              2. Модерировать контент (право: moderate) {perms.includes('moderate') ? '— [Доступно]' : '— [Заблокировано]'}
-            </button><br />
-
-            <button 
-              onClick={() => checkAction('admin')}
-              style={{ backgroundColor: perms.includes('admin') ? '#d4edda' : '#eee', padding: '8px', marginBottom: '8px', cursor: 'pointer' }}>
-              3. Управление системой (право: admin) {perms.includes('admin') ? '— [Доступно]' : '— [Заблокировано]'}
-            </button>
-
-            {accessMsg && <p style={{ fontSize: 18 }}><b>{accessMsg}</b></p>}
+            {accessMsg && <div className="status-box">{accessMsg}</div>}
           </div>
         )}
       </div>

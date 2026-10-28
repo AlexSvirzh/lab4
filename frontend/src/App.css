@@ -1,0 +1,175 @@
+:root {
+  --purple: #7D51FE;
+  --lime: #AAFF00;
+  --lime-dark: #7AB800;
+  --bg-dark: #141414;
+  --card-dark: #333333;
+  --white: #FFFFFF;
+  --light-gray: #F2F2F3;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 30px 15px;
+  background-color: var(--bg-dark);
+  color: var(--white);
+  font-family: 'Encode Sans', sans-serif;
+}
+
+.container {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+/* Верхний баннер */
+.hero-banner {
+  background: radial-gradient(circle at 85% 20%, var(--lime) 0%, transparent 45%),
+              radial-gradient(circle at 15% 20%, var(--purple) 0%, transparent 50%),
+              radial-gradient(circle at 80% 90%, var(--purple) 0%, transparent 50%),
+              #141414;
+  border-radius: 24px;
+  padding: 32px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+}
+
+.hero-logo {
+  font-family: 'Anton', sans-serif;
+  font-size: 42px;
+  letter-spacing: 2px;
+  margin: 0 0 8px 0;
+  text-transform: uppercase;
+}
+
+.hero-subtitle {
+  margin: 0;
+  color: var(--light-gray);
+  font-size: 15px;
+  opacity: 0.9;
+}
+
+/* Карточки блоков */
+.card {
+  background-color: var(--card-dark);
+  border-radius: 22px;
+  padding: 26px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.card h3 {
+  font-family: 'Anton', sans-serif;
+  font-size: 24px;
+  letter-spacing: 1px;
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: var(--lime);
+  text-transform: uppercase;
+}
+
+/* Поля ввода и выпадающие списки */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--light-gray);
+  margin-bottom: 6px;
+}
+
+input, select {
+  width: 100%;
+  padding: 13px 16px;
+  background-color: var(--bg-dark);
+  border: 2px solid #484848;
+  border-radius: 14px;
+  color: var(--white);
+  font-family: 'Encode Sans', sans-serif;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+input:focus, select:focus {
+  border-color: var(--purple);
+}
+
+/* Главная кнопка */
+.btn-lime {
+  width: 100%;
+  padding: 14px 20px;
+  background-color: var(--lime);
+  color: var(--bg-dark);
+  font-family: 'Encode Sans', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.btn-lime:hover {
+  background-color: var(--lime-dark);
+}
+
+.btn-lime:active {
+  transform: scale(0.99);
+}
+
+/* Кнопки проверки действий RBAC */
+.actions-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.btn-action {
+  padding: 13px 18px;
+  background-color: var(--purple);
+  color: var(--white);
+  font-family: 'Encode Sans', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+.btn-action:hover {
+  opacity: 0.9;
+}
+
+/* Права */
+.badge {
+  display: inline-block;
+  background-color: var(--bg-dark);
+  color: var(--lime);
+  border: 1px solid var(--lime);
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  margin-right: 6px;
+}
+
+/* Уведомления о результате */
+.status-box {
+  margin-top: 16px;
+  padding: 14px 18px;
+  background-color: var(--bg-dark);
+  border-radius: 14px;
+  font-weight: 600;
+  border-left: 5px solid var(--lime);
+}

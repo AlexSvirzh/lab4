@@ -61,11 +61,11 @@ lab4/
 └── frontend/                  # Клиентская часть (React + Vite)
     ├── Dockerfile             # Сборка образа для Frontend
     ├── package.json           # Зависимости Node.js
-    ├── vite.config.js         # Конфигурация сборщика Vite
+    ├── vite.config.ts         # Конфигурация сборщика Vite
     ├── index.html             # Корневой HTML-шаблон
     └── src/
-        ├── main.jsx           # Точка входа React-приложения
-        └── App.jsx            # Форма /register и интерфейс проверки ролей
+        ├── main.tsx           # Точка входа React-приложения
+        └── App.tsx            # Форма /register и интерфейс проверки ролей
 ```
 
 ---

@@ -68,9 +68,8 @@ export default function App() {
 
   return (
     <div className="container">
-      {/* Фирменная шапка в стиле LOOT */}
       <div className="hero-banner">
-        <h1 className="hero-logo">LOOT ACCESS</h1>
+        <h1 className="hero-logo">RBAC ACCESS</h1>
         <p className="hero-subtitle">Лабораторная работа 4 • Регистрация и Ролевая модель доступа (Вариант 3)</p>
       </div>
 

@@ -1,23 +1,15 @@
 import React, { useState, useEffect } from 'react'
 
-// Описываем тип пользователя для TypeScript
-interface UserInfo {
-  login: string
-  role: string
-  permissions: string[]
-}
-
 export default function App() {
-  const [login, setLogin] = useState<string>('')
-  const [password, setPassword] = useState<string>('')
-  const [role, setRole] = useState<string>('user')
-  const [msg, setMsg] = useState<string>('')
+  const [login, setLogin] = useState('')
+  const [password, setPassword] = useState('')
+  const [role, setRole] = useState('user')
+  const [msg, setMsg] = useState('')
 
-  const [users, setUsers] = useState<UserInfo[]>([])
-  const [selectedUser, setSelectedUser] = useState<string>('')
-  const [accessMsg, setAccessMsg] = useState<string>('')
+  const [users, setUsers] = useState([])
+  const [selectedUser, setSelectedUser] = useState('')
+  const [accessMsg, setAccessMsg] = useState('')
 
-  // Чтобы в адресной строке всегда было /register (по требованию методички)
   useEffect(() => {
     if (window.location.pathname !== '/register') {
       window.history.replaceState({}, '', '/register')
@@ -26,34 +18,40 @@ export default function App() {
   }, [])
 
   async function loadUsers() {
-    const res = await fetch('http://localhost:8000/api/users')
-    const data: UserInfo[] = await res.json()
-    setUsers(data)
-    if (data.length > 0 && !selectedUser) {
-      setSelectedUser(data[0].login)
+    try {
+      const res = await fetch('http://localhost:8000/api/users')
+      const data = await res.json()
+      setUsers(data)
+      if (data.length > 0 && !selectedUser) setSelectedUser(data[0].login)
+    } catch (e) {
+      console.error(e)
     }
   }
 
-  async function handleRegister(e: React.FormEvent) {
+  async function handleRegister(e) {
     e.preventDefault()
-    const res = await fetch('http://localhost:8000/api/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ login, password, role })
-    })
-    const data = await res.json()
-    if (res.ok) {
-      setMsg('✅ Успех: ' + data.message)
-      setSelectedUser(login)
-      setLogin('')
-      setPassword('')
-      loadUsers()
-    } else {
-      setMsg('❌ Ошибка: ' + data.detail)
+    try {
+      const res = await fetch('http://localhost:8000/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ login, password, role })
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setMsg('✅ Успех: ' + data.message)
+        setSelectedUser(login)
+        setLogin('')
+        setPassword('')
+        loadUsers()
+      } else {
+        setMsg('❌ Ошибка: ' + data.detail)
+      }
+    } catch (err) {
+      setMsg('⛔ Ошибка соединения с сервером')
     }
   }
 
-  async function checkAction(perm: string) {
+  async function checkAction(perm) {
     const res = await fetch(`http://localhost:8000/api/action/${perm}?login=${selectedUser}`)
     const data = await res.json()
     if (res.ok) {
@@ -64,6 +62,7 @@ export default function App() {
   }
 
   const currentUserObj = users.find(u => u.login === selectedUser)
+  const perms = currentUserObj ? currentUserObj.permissions : []
 
   return (
     <div>
@@ -107,13 +106,28 @@ export default function App() {
             </p>
 
             {currentUserObj && (
-              <p>Доступные права этой роли в БД: <b>{currentUserObj.permissions.join(', ')}</b></p>
+              <p>Текущая роль: <b>{currentUserObj.role}</b> | Права роли в БД: <b>{perms.join(', ')}</b></p>
             )}
 
-            <p>Проверить действие на Backend:</p>
-            <button onClick={() => checkAction('read')}>1. Читать статьи (нужно право read)</button><br /><br />
-            <button onClick={() => checkAction('moderate')}>2. Модерировать (нужно право moderate)</button><br /><br />
-            <button onClick={() => checkAction('admin')}>3. Удалить систему (нужно право admin)</button>
+            <p>Действия в системе (зеленые — доступны роли, серые — запрещены на Backend):</p>
+            
+            <button 
+              onClick={() => checkAction('read')}
+              style={{ backgroundColor: perms.includes('read') ? '#d4edda' : '#eee', padding: '8px', marginBottom: '8px', cursor: 'pointer' }}>
+              1. Читать статьи (право: read) {perms.includes('read') ? '— [Доступно]' : '— [Заблокировано]'}
+            </button><br />
+
+            <button 
+              onClick={() => checkAction('moderate')}
+              style={{ backgroundColor: perms.includes('moderate') ? '#d4edda' : '#eee', padding: '8px', marginBottom: '8px', cursor: 'pointer' }}>
+              2. Модерировать контент (право: moderate) {perms.includes('moderate') ? '— [Доступно]' : '— [Заблокировано]'}
+            </button><br />
+
+            <button 
+              onClick={() => checkAction('admin')}
+              style={{ backgroundColor: perms.includes('admin') ? '#d4edda' : '#eee', padding: '8px', marginBottom: '8px', cursor: 'pointer' }}>
+              3. Управление системой (право: admin) {perms.includes('admin') ? '— [Доступно]' : '— [Заблокировано]'}
+            </button>
 
             {accessMsg && <p style={{ fontSize: 18 }}><b>{accessMsg}</b></p>}
           </div>
